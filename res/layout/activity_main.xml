@@ -1,0 +1,30 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.android2ee.mediaplayer.MainActivity" 
+    android:orientation="vertical">
+
+    <EditText android:id="@+id/edittext_recorder"
+        	  android:layout_width="match_parent"
+        	  android:layout_height="wrap_content"
+        	  android:layout_marginTop="30dp"
+        	  android:inputType="textUri"
+        	  android:textAppearance="?android:attr/textAppearanceMedium"
+        	  android:hint="Name of Record"/>
+    
+    <ImageButton
+        android:id="@+id/button_recorder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@android:drawable/btn_radio" 
+        android:layout_gravity="center_horizontal"
+        android:contentDescription="recorder"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="30dp"/>
+    
+    <ListView android:id="@+id/list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+</LinearLayout>

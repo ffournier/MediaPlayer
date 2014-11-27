@@ -1,0 +1,65 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.android2ee.mediaplayer.PlayerActivity" 
+    android:orientation="vertical">
+
+    
+    <LinearLayout android:id="@+id/linear_control"
+        			android:orientation="horizontal"
+        			android:layout_width="match_parent"
+        			android:layout_height="wrap_content"
+        			android:layout_alignParentBottom="true"
+        			android:layout_marginBottom="30dp"
+        			android:layout_marginTop="10dp">
+        			
+        <ImageButton android:id="@+id/player_reset"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:src="@android:drawable/ic_media_previous"
+        	android:layout_weight="1"
+        	android:layout_gravity="center_horizontal"/> 
+        	
+        <ImageButton android:id="@+id/player_play"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:src="@android:drawable/ic_media_play"
+        	android:layout_weight="1"
+        	android:layout_gravity="center_horizontal"/> 
+        	
+    </LinearLayout>
+    
+    <LinearLayout android:id="@+id/linear_timer"
+        			android:orientation="horizontal"
+        			android:layout_width="match_parent"
+        			android:layout_height="wrap_content"
+        			android:layout_marginTop="3dp"
+			        android:layout_marginLeft="10dp"
+			        android:layout_marginRight="10dp"
+			        android:layout_above="@id/linear_control">
+	    <TextView
+	        android:id="@+id/player_timer"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="1"
+	        android:gravity="left"/>
+	    
+	    <TextView
+	        android:id="@+id/player_duration"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="1"
+	        android:gravity="right"/>
+    </LinearLayout>
+    
+    <SeekBar
+        android:id="@+id/player_seekbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_above="@id/linear_timer"/>
+      
+</RelativeLayout>
