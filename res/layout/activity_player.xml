@@ -43,14 +43,15 @@
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:layout_weight="1"
-	        android:gravity="left"/>
+	        android:gravity="start"/>
 	    
 	    <TextView
 	        android:id="@+id/player_duration"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:layout_weight="1"
-	        android:gravity="right"/>
+	        android:gravity="end"/>
+	    
     </LinearLayout>
     
     <SeekBar
@@ -61,5 +62,14 @@
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:layout_above="@id/linear_timer"/>
-      
+    
+    
+    <LinearLayout android:id="@+id/player_chart1"
+        			android:orientation="horizontal"
+        			android:layout_width="match_parent"
+        			android:layout_height="wrap_content"
+        			android:layout_above="@id/player_seekbar"
+        			android:background="@android:color/transparent"
+        			android:layout_marginTop="20dp"
+        			android:layout_alignParentTop="true"/>
 </RelativeLayout>

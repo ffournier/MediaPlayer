@@ -82,6 +82,10 @@ public class POJOAudio implements Parcelable, Comparable<POJOAudio> {
 		return time;
 	}
 	
+	public void updateTime() {
+		calculDuration();
+	}
+	
 	@Override
 	public String toString() {
 		if (time < 0) {
@@ -89,7 +93,7 @@ public class POJOAudio implements Parcelable, Comparable<POJOAudio> {
 		} else {
 			SimpleDateFormat format = new SimpleDateFormat("HH-mm-ss", Locale.getDefault());
 			format.setTimeZone(TimeZone.getTimeZone("UTC"));
-			return name + "time " + format.format((new Date(time)));
+			return name + " ,time " + format.format((new Date(time)));
 		}
 	}
 

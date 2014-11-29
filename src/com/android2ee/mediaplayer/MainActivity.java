@@ -165,6 +165,7 @@ public class MainActivity extends ABoundActivity {
 			
 			if (object != null) {
 				// add in list
+				object.updateTime();
 				audios.add(object);
 				mAdapter.notifyDataSetChanged();
 			}

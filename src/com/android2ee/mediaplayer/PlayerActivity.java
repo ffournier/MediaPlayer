@@ -6,6 +6,14 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import org.achartengine.ChartFactory;
+import org.achartengine.GraphicalView;
+import org.achartengine.model.XYMultipleSeriesDataset;
+import org.achartengine.model.XYSeries;
+import org.achartengine.renderer.XYMultipleSeriesRenderer;
+import org.achartengine.renderer.XYSeriesRenderer;
+
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -13,6 +21,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
@@ -31,10 +40,16 @@ public class PlayerActivity extends ABoundActivity {
 	private SeekBar seekbar;
 	private TextView tvDuration;
 	private TextView tvTimer;
+	private GraphicalView mChartFFT;
 	
 	private boolean isPlayingBefore = false;
 	
-	private class MyHandler extends Handler {
+    private XYMultipleSeriesDataset mDatasetFFT = new XYMultipleSeriesDataset();
+    private XYMultipleSeriesRenderer mRendererFFT = new XYMultipleSeriesRenderer();
+    private XYSeries mCurrentSeriesFFT;
+    private XYSeriesRenderer mCurrentRendererFFT;
+    
+    private class MyHandler extends Handler {
 		
 		@Override
 	    public void handleMessage(Message message) {
@@ -50,9 +65,14 @@ public class PlayerActivity extends ABoundActivity {
 	        case MediaService.PLAY_END:
 	        	progress = message.getData().getInt(MediaService.KEY_PLAY_CURRENT);
         		duration = message.getData().getInt(MediaService.KEY_PLAY_DURATION);
-        		updateResource(false, duration, progress);
+        		updateResource(false, duration, duration);
 	        	mService.restartPlayer();
-	            break;
+	        	break;
+	       case MediaService.PLAY_FFT:
+	        	byte[] fft = message.getData().getByteArray(MediaService.KEY_PLAY_FFT);
+	        	int rateFFT = message.getData().getInt(MediaService.KEY_PLAY_RATE);
+        		addDataFFT(fft, rateFFT);
+	            break;    
 	        }
 			
 		}
@@ -225,7 +245,44 @@ public class PlayerActivity extends ABoundActivity {
 	@Override
 	protected void onStart() {
 		super.onStart();
+		
+		LinearLayout layoutFFT = (LinearLayout) findViewById(R.id.player_chart1);
+        if (mChartFFT == null) {
+            initChartFFT();
+            mChartFFT = ChartFactory.getCubeLineChartView(this, mDatasetFFT, mRendererFFT, 0.3f);
+            mChartFFT.setBackgroundResource(android.R.color.transparent);
+            layoutFFT.addView(mChartFFT);
+        } else {
+        	mChartFFT.repaint();
+        }
 	}
+	
+	/**
+	 * 
+	 */
+	private void initChartFFT() {
+        mCurrentSeriesFFT = new XYSeries("FFT Data");
+        mDatasetFFT.addSeries(mCurrentSeriesFFT);
+        mCurrentRendererFFT = new XYSeriesRenderer();
+        mCurrentRendererFFT.setColor(Color.BLUE);
+        mRendererFFT.addSeriesRenderer(mCurrentRendererFFT);
+        mRendererFFT.setApplyBackgroundColor(true);
+        mRendererFFT.setBackgroundColor(Color.argb(0x00, 0xff, 0x00, 0x00));
+        mRendererFFT.setMarginsColor(Color.argb(0x00, 0xff, 0x00, 0x00));
+        mRendererFFT.setYAxisMax(128);
+        mRendererFFT.setYAxisMin(-128);
+    }
+	
+	/**
+	 * 
+	 */
+    private void addDataFFT(byte[] fft, int rate) {
+    	mCurrentSeriesFFT.clear();
+    	for (int i = 0 ; i < fft.length; i+=2) {
+    		mCurrentSeriesFFT.add( (i/2), fft[i]);
+    	}
+        mChartFFT.repaint();
+    }
 	
 	
 	@Override

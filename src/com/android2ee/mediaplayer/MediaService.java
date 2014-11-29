@@ -12,6 +12,8 @@ import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.media.MediaRecorder;
+import android.media.audiofx.Visualizer;
+import android.media.audiofx.Visualizer.OnDataCaptureListener;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -29,12 +31,15 @@ public class MediaService extends Service implements OnAudioFocusChangeListener 
 	
 	public static final int PLAY_PROGRESS = 0;
 	public static final int PLAY_END = 1;
+	public static final int PLAY_FFT = 2;
 	
 	public static final int ACTION_STOP = 1;
 	
 	
 	public static final String KEY_PLAY_DURATION = "com.android2ee.mediaplayer.duration_media";
 	public static final String KEY_PLAY_CURRENT = "com.android2ee.mediaplayer.current_media";
+	public static final String KEY_PLAY_FFT = "com.android2ee.mediaplayer.fft_media";
+	public static final String KEY_PLAY_RATE = "com.android2ee.mediaplayer.rate_media";
 	public static final String KEY_ACTION_PLAY = "com.android2ee.mediaplayer.action_play";
 	
 	
@@ -50,6 +55,8 @@ public class MediaService extends Service implements OnAudioFocusChangeListener 
 	
 	private AudioFocusHelper audioFocusHelper;
 	
+	private Visualizer mVisualizer;
+
 	public enum StatePlayer {
 		STATE_DEFAULT,
 		STATE_PLAY,
@@ -89,6 +96,7 @@ public class MediaService extends Service implements OnAudioFocusChangeListener 
 			@Override
 			public void onCompletion(MediaPlayer mp) {
 				isPlay = StatePlayer.STATE_PAUSE;
+				mVisualizer.setEnabled(false);
 				sendPlayEnding();
 			}
 		});
@@ -235,15 +243,36 @@ public class MediaService extends Service implements OnAudioFocusChangeListener 
 			try {
 				mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 				mPlayer.setDataSource(path);
+				
+				Log.i("MediaService", "audio id " +mPlayer.getAudioSessionId());
+				mVisualizer = new Visualizer(mPlayer.getAudioSessionId());
+				mVisualizer.setCaptureSize(Visualizer.getCaptureSizeRange()[0]);
+				Log.i("MediaService", "audio size " + Visualizer.getCaptureSizeRange()[0]);
+				mVisualizer.setDataCaptureListener(new OnDataCaptureListener() {
+					
+					@Override
+					public void onWaveFormDataCapture(Visualizer visualizer, byte[] waveform,
+							int samplingRate) {
+						
+					}
+					
+					@Override
+					public void onFftDataCapture(Visualizer visualizer, byte[] fft,
+							int samplingRate) {
+						sendPlayFFT(fft, samplingRate);
+					}
+				}, Visualizer.getMaxCaptureRate() / 2, false, true);
+				
 				mPlayer.prepareAsync();
 				mPlayer.setOnPreparedListener(new OnPreparedListener() {
 					
 					@Override
 					public void onPrepared(MediaPlayer mp) {
-						// TODO Auto-generated method stub
 						mPlayer.start();
 						isPlay = StatePlayer.STATE_PLAY;
 						scheduleTimer();
+						mVisualizer.setEnabled(true);
+						
 					}
 				});
 				
@@ -275,11 +304,13 @@ public class MediaService extends Service implements OnAudioFocusChangeListener 
 			if (isPlay == StatePlayer.STATE_PLAY) {
 				Log.i("MediaService", "prPlayer Pause");
 				mPlayer.pause();
+				mVisualizer.setEnabled(false);
 				isPlay = StatePlayer.STATE_PAUSE;
 				purgeTimer();
 			} else {
 				Log.i("MediaService", "prPlayer Play");
 				mPlayer.start();
+				mVisualizer.setEnabled(true);
 				isPlay = StatePlayer.STATE_PLAY;
 				scheduleTimer();
 			}
@@ -336,6 +367,23 @@ public class MediaService extends Service implements OnAudioFocusChangeListener 
 			Bundle bundle = new Bundle();
 			bundle.putInt(KEY_PLAY_DURATION, mPlayer.getDuration() / 1000);
 			bundle.putInt(KEY_PLAY_CURRENT, mPlayer.getCurrentPosition() / 1000);
+			msg.setData(bundle);
+			handler.sendMessage(msg);
+		}
+	}
+	
+	/**
+	 * 
+	 */
+	private void sendPlayFFT(byte[] fft, int rate) {
+		if (handler != null && isPlayerPlay()) {
+			Message msg = handler.obtainMessage();
+			msg.what = PLAY_FFT;
+			Bundle bundle = new Bundle();
+			bundle.putInt(KEY_PLAY_DURATION, mPlayer.getDuration() / 1000);
+			bundle.putInt(KEY_PLAY_CURRENT, mPlayer.getCurrentPosition() / 1000);
+			bundle.putByteArray(KEY_PLAY_FFT, fft);
+			bundle.putInt(KEY_PLAY_RATE, rate);
 			msg.setData(bundle);
 			handler.sendMessage(msg);
 		}
@@ -428,6 +476,10 @@ public class MediaService extends Service implements OnAudioFocusChangeListener 
 		releasePlayer();
 		
 		cancelTimer();
+		
+		if (mVisualizer != null) {
+			mVisualizer.release();
+		}
 		
 		super.onDestroy();
 		
