@@ -7,28 +7,35 @@ import java.util.TimerTask;
 import android.app.Service;
 import android.content.Intent;
 import android.media.AudioManager;
+import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
+import android.media.MediaPlayer.OnPreparedListener;
 import android.media.MediaRecorder;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.util.Log;
 
 /**
  * 
  * @author florian
  *
  */
-public class MediaService extends Service {
+public class MediaService extends Service implements OnAudioFocusChangeListener {
 	
 	
 	public static final int PLAY_PROGRESS = 0;
 	public static final int PLAY_END = 1;
 	
+	public static final int ACTION_STOP = 1;
+	
+	
 	public static final String KEY_PLAY_DURATION = "com.android2ee.mediaplayer.duration_media";
 	public static final String KEY_PLAY_CURRENT = "com.android2ee.mediaplayer.current_media";
+	public static final String KEY_ACTION_PLAY = "com.android2ee.mediaplayer.action_play";
 	
 	
 	//declaration
@@ -40,6 +47,8 @@ public class MediaService extends Service {
 	private Timer mTimer;
 	
 	private Handler handler;
+	
+	private AudioFocusHelper audioFocusHelper;
 	
 	public enum StatePlayer {
 		STATE_DEFAULT,
@@ -88,10 +97,25 @@ public class MediaService extends Service {
 		handler = null;
 		
 		mTimer = new Timer();
+		
+		audioFocusHelper = new AudioFocusHelper(this);
+		audioFocusHelper.requestFocus(this);
 	}
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
+		if (intent != null && intent.getExtras() != null && intent.getExtras().containsKey(KEY_ACTION_PLAY)) {
+			int action = intent.getIntExtra(KEY_ACTION_PLAY, -1);
+			switch(action) {
+			case ACTION_STOP :
+				Log.i("MediaService", "ACTION STOP");
+				if (isPlayerCreate() && isPlayerPlay()) {
+					Log.i("MediaService", "ACTION STOP execute");
+					prPlayer();
+				}
+				break;
+			}
+		}
 		return super.onStartCommand(intent, flags, startId);
 	}
 	
@@ -211,10 +235,18 @@ public class MediaService extends Service {
 			try {
 				mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 				mPlayer.setDataSource(path);
-				mPlayer.prepare();
-				mPlayer.start();
-				isPlay = StatePlayer.STATE_PLAY;
-				scheduleTimer();
+				mPlayer.prepareAsync();
+				mPlayer.setOnPreparedListener(new OnPreparedListener() {
+					
+					@Override
+					public void onPrepared(MediaPlayer mp) {
+						// TODO Auto-generated method stub
+						mPlayer.start();
+						isPlay = StatePlayer.STATE_PLAY;
+						scheduleTimer();
+					}
+				});
+				
 			} catch (IllegalArgumentException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -238,12 +270,15 @@ public class MediaService extends Service {
 	 * @return
 	 */
 	public void prPlayer(){
+		Log.i("MediaService", "prPlayer");
 		if(isPlay != StatePlayer.STATE_DEFAULT){
 			if (isPlay == StatePlayer.STATE_PLAY) {
+				Log.i("MediaService", "prPlayer Pause");
 				mPlayer.pause();
 				isPlay = StatePlayer.STATE_PAUSE;
 				purgeTimer();
 			} else {
+				Log.i("MediaService", "prPlayer Play");
 				mPlayer.start();
 				isPlay = StatePlayer.STATE_PLAY;
 				scheduleTimer();
@@ -387,14 +422,52 @@ public class MediaService extends Service {
 
 	@Override
 	public void onDestroy() {
-		super.onDestroy();
+		audioFocusHelper.abandonFocus(this);
 		
 		releaseRecorder();
 		releasePlayer();
 		
 		cancelTimer();
 		
+		super.onDestroy();
 		
+	}
+
+	@Override
+	public void onAudioFocusChange(int focusChange) {
+		switch(focusChange) {
+			case AudioManager.AUDIOFOCUS_GAIN:
+			case AudioManager.AUDIOFOCUS_GAIN_TRANSIENT:
+			case AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE:
+				if (isPlayerCreate() && isPlayerPlay()) {
+					mPlayer.setVolume(1.0f, 1.0f);
+				}
+				break;
+			
+			case AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK:
+				if (isPlayerCreate() && isPlayerPlay()) {
+					mPlayer.setVolume(0.8f, 0.8f);
+				}
+			break;
+			case AudioManager.AUDIOFOCUS_LOSS:
+				if (isPlayerCreate() && isPlayerPlay()) {
+					mPlayer.setVolume(1.0f, 1.0f);
+				}
+				break;
+			case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+				Log.i("MediaService", "AUDIOFOCUS_LOSS_TRANSIENT");
+				if (isPlayerCreate() && isPlayerPlay()) {
+					Log.i("MediaService", "AUDIOFOCUS_LOSS_TRANSIENT execute");
+					
+					prPlayer();
+				}
+				break;
+			case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+				if (isPlayerCreate() && isPlayerPlay()) {
+					mPlayer.setVolume(0.2f, 0.2f);
+				}
+				break;
+		}
 	}
 	
 }

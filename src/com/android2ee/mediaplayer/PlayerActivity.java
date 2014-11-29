@@ -9,6 +9,7 @@ import java.util.TimeZone;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
@@ -66,12 +67,20 @@ public class PlayerActivity extends ABoundActivity {
 		if (!mService.isPlayerCreate()) {
 			mService.startPlayer(audio.getPath());
 		} else if (isPlayingBefore) {
+			Log.i("PlayerActivity", "playing before ");
 			mService.prPlayer();
+		} else {
+			Log.i("PlayerActivity", "not playing before ");
 		}
 	}
 	
+	/**
+	 * 
+	 */
 	private void disconnect() {
 		if (mBound) {
+			
+			isPlayingBefore = mService.isPlayerPlay();
 			if (isFinishing()) {
 				mService.stopPlayer();
 			} else {
@@ -80,6 +89,8 @@ public class PlayerActivity extends ABoundActivity {
 				}
 			}
 			mService.setHandler(null);
+		} else {
+			isPlayingBefore = false;
 		}
 	}
 	
@@ -139,12 +150,12 @@ public class PlayerActivity extends ABoundActivity {
 			@Override
 			public void onStopTrackingTouch(SeekBar seekBar) {
 				if (mBound) {
-				if (!seekBar.isIndeterminate()) {
-					int progress = seekBar.getProgress();
-					if (mBound) {
-						mService.seekPlayerTo(progress);
+					if (!seekBar.isIndeterminate()) {
+						int progress = seekBar.getProgress();
+						if (mBound) {
+							mService.seekPlayerTo(progress);
+						}
 					}
-				}
 				}
 			}
 			
@@ -204,6 +215,10 @@ public class PlayerActivity extends ABoundActivity {
 		int duration = savedInstanceState.getInt(KEY_AUDIO_DURATION);
 		int progress = savedInstanceState.getInt(KEY_AUDIO_CURRENT);
 		isPlayingBefore = savedInstanceState.getBoolean(KEY_AUDIO_PLAYING);
+		Log.i("PlayerActivity", "onRestoreInstanceState");
+		if (isPlayingBefore && mService != null && !mService.isPlayerPlay()) {
+			mService.prPlayer();
+		} 
 		updateResource(isPlayingBefore, duration, progress);
 	}
 
