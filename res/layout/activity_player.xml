@@ -63,13 +63,36 @@
         android:layout_marginRight="10dp"
         android:layout_above="@id/linear_timer"/>
     
-    
-    <LinearLayout android:id="@+id/player_chart1"
-        			android:orientation="horizontal"
-        			android:layout_width="match_parent"
-        			android:layout_height="wrap_content"
-        			android:layout_above="@id/player_seekbar"
-        			android:background="@android:color/transparent"
-        			android:layout_marginTop="20dp"
-        			android:layout_alignParentTop="true"/>
+    <LinearLayout android:layout_width="match_parent"
+	        			android:layout_height="wrap_content"
+	        			android:background="@android:color/transparent"
+	        			android:layout_alignParentTop="true"
+	        			android:layout_marginTop="10dp"
+	        			android:layout_above="@id/player_seekbar"
+	        			android:orientation="vertical">
+	    
+	    <!-- <LinearLayout android:id="@+id/player_chartfft"
+	        			android:layout_width="match_parent"
+	        			android:layout_height="match_parent"
+	        			android:orientation="vertical"
+	        			android:layout_weight="1"/> -->
+	     <com.android2ee.mediaplayer.VisualizerFFTView
+	        		    android:id="@+id/player_viewfft"
+	       				android:layout_width="match_parent"
+	        			android:layout_height="match_parent"
+	        			android:layout_marginTop="10dp"
+	        			android:layout_marginLeft="10dp"
+        				android:layout_marginRight="10dp"
+	        			android:layout_weight="1">
+	        
+	    </com.android2ee.mediaplayer.VisualizerFFTView>   			
+	    <com.android2ee.mediaplayer.VisualizerView
+	        		    android:id="@+id/player_view"
+	       				android:layout_width="match_parent"
+	        			android:layout_height="match_parent"
+	        			android:layout_marginTop="10dp"
+	        			android:layout_weight="1">
+	        
+	    </com.android2ee.mediaplayer.VisualizerView>
+    </LinearLayout>
 </RelativeLayout>

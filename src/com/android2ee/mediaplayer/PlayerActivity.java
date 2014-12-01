@@ -6,14 +6,6 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import org.achartengine.ChartFactory;
-import org.achartengine.GraphicalView;
-import org.achartengine.model.XYMultipleSeriesDataset;
-import org.achartengine.model.XYSeries;
-import org.achartengine.renderer.XYMultipleSeriesRenderer;
-import org.achartengine.renderer.XYSeriesRenderer;
-
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -21,7 +13,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
@@ -40,14 +31,11 @@ public class PlayerActivity extends ABoundActivity {
 	private SeekBar seekbar;
 	private TextView tvDuration;
 	private TextView tvTimer;
-	private GraphicalView mChartFFT;
 	
 	private boolean isPlayingBefore = false;
 	
-    private XYMultipleSeriesDataset mDatasetFFT = new XYMultipleSeriesDataset();
-    private XYMultipleSeriesRenderer mRendererFFT = new XYMultipleSeriesRenderer();
-    private XYSeries mCurrentSeriesFFT;
-    private XYSeriesRenderer mCurrentRendererFFT;
+    private VisualizerView myView;
+	private VisualizerFFTView myViewFFT;
     
     private class MyHandler extends Handler {
 		
@@ -67,14 +55,27 @@ public class PlayerActivity extends ABoundActivity {
         		duration = message.getData().getInt(MediaService.KEY_PLAY_DURATION);
         		updateResource(false, duration, duration);
 	        	mService.restartPlayer();
+	        	myView.endVisualizer();
+	        	myViewFFT.endVisualizer();
 	        	break;
+	        case MediaService.PLAY_START:
+	        	progress = message.getData().getInt(MediaService.KEY_PLAY_CURRENT);
+        		duration = message.getData().getInt(MediaService.KEY_PLAY_DURATION);
+        		updateResource(true, duration, progress);
+        		myView.startVisualizer();
+	        	myViewFFT.startVisualizer();
+	        	break; 	
 	       case MediaService.PLAY_FFT:
 	        	byte[] fft = message.getData().getByteArray(MediaService.KEY_PLAY_FFT);
 	        	int rateFFT = message.getData().getInt(MediaService.KEY_PLAY_RATE);
         		addDataFFT(fft, rateFFT);
 	            break;    
+	        case MediaService.PLAY_WAVEFROM:
+	        	byte[] waveFrom = message.getData().getByteArray(MediaService.KEY_PLAY_WAVEFROM);
+	        	int rateWaveFrom = message.getData().getInt(MediaService.KEY_PLAY_RATE);
+	    		addDataWaveFrom(waveFrom, rateWaveFrom);
+	            break;    
 	        }
-			
 		}
 	}
 	
@@ -191,6 +192,8 @@ public class PlayerActivity extends ABoundActivity {
 		
 		tvDuration = (TextView) findViewById(R.id.player_duration);
 		tvTimer = (TextView) findViewById(R.id.player_timer);
+		myView = (VisualizerView) findViewById(R.id.player_view);
+		myViewFFT = (VisualizerFFTView) findViewById(R.id.player_viewfft);
 	}
 	
 	private void updateResource(boolean isPlaying, int duration, int progress) {
@@ -242,46 +245,23 @@ public class PlayerActivity extends ABoundActivity {
 		updateResource(isPlayingBefore, duration, progress);
 	}
 
-	@Override
-	protected void onStart() {
-		super.onStart();
-		
-		LinearLayout layoutFFT = (LinearLayout) findViewById(R.id.player_chart1);
-        if (mChartFFT == null) {
-            initChartFFT();
-            mChartFFT = ChartFactory.getCubeLineChartView(this, mDatasetFFT, mRendererFFT, 0.3f);
-            mChartFFT.setBackgroundResource(android.R.color.transparent);
-            layoutFFT.addView(mChartFFT);
-        } else {
-        	mChartFFT.repaint();
-        }
-	}
-	
-	/**
-	 * 
-	 */
-	private void initChartFFT() {
-        mCurrentSeriesFFT = new XYSeries("FFT Data");
-        mDatasetFFT.addSeries(mCurrentSeriesFFT);
-        mCurrentRendererFFT = new XYSeriesRenderer();
-        mCurrentRendererFFT.setColor(Color.BLUE);
-        mRendererFFT.addSeriesRenderer(mCurrentRendererFFT);
-        mRendererFFT.setApplyBackgroundColor(true);
-        mRendererFFT.setBackgroundColor(Color.argb(0x00, 0xff, 0x00, 0x00));
-        mRendererFFT.setMarginsColor(Color.argb(0x00, 0xff, 0x00, 0x00));
-        mRendererFFT.setYAxisMax(128);
-        mRendererFFT.setYAxisMin(-128);
-    }
 	
 	/**
 	 * 
 	 */
     private void addDataFFT(byte[] fft, int rate) {
-    	mCurrentSeriesFFT.clear();
-    	for (int i = 0 ; i < fft.length; i+=2) {
-    		mCurrentSeriesFFT.add( (i/2), fft[i]);
+    	if (mBound && mService.isPlayerPlay()) {
+    		myViewFFT.updateVisualizer(fft);
     	}
-        mChartFFT.repaint();
+    }
+    
+    /**
+	 * 
+	 */
+    private void addDataWaveFrom(byte[] waveFrom, int rate) {
+    	if (mBound && mService.isPlayerPlay()) {
+    		myView.updateVisualizer(waveFrom);
+    	}
     }
 	
 	
@@ -297,5 +277,5 @@ public class PlayerActivity extends ABoundActivity {
 		super.onDestroy();
 		
 	}
-
+	
 }
