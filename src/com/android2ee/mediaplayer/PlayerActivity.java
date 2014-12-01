@@ -83,7 +83,6 @@ public class PlayerActivity extends ABoundActivity {
 	
 	@Override
 	protected void serviceConnected(MediaService service) {
-		//TODO start play ?
 		mService.setHandler(myHandler);
 		if (!mService.isPlayerCreate()) {
 			mService.startPlayer(audio.getPath());
@@ -103,6 +102,7 @@ public class PlayerActivity extends ABoundActivity {
 			
 			isPlayingBefore = mService.isPlayerPlay();
 			if (isFinishing()) {
+				Log.i("PlayerActivity", "disconnect stop Player ");
 				mService.stopPlayer();
 			} else {
 				if (mService.isPlayerPlay()) {
@@ -228,7 +228,7 @@ public class PlayerActivity extends ABoundActivity {
 		
 		outState.putInt(KEY_AUDIO_DURATION, seekbar.getMax());
 		outState.putInt(KEY_AUDIO_CURRENT, seekbar.getProgress());
-		outState.putBoolean(KEY_AUDIO_PLAYING, !seekbar.isIndeterminate());
+		outState.putBoolean(KEY_AUDIO_PLAYING, mService != null && mService.isPlayerCreate() && mService.isPlayerPlay());
 		super.onSaveInstanceState(outState);
 	}
 
@@ -239,6 +239,7 @@ public class PlayerActivity extends ABoundActivity {
 		int progress = savedInstanceState.getInt(KEY_AUDIO_CURRENT);
 		isPlayingBefore = savedInstanceState.getBoolean(KEY_AUDIO_PLAYING);
 		Log.i("PlayerActivity", "onRestoreInstanceState");
+		Log.i("PlayerActivity", "Isplayingbefore" + isPlayingBefore);
 		if (isPlayingBefore && mService != null && !mService.isPlayerPlay()) {
 			mService.prPlayer();
 		} 

@@ -1,7 +1,6 @@
 package com.android2ee.mediaplayer;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -9,6 +8,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.media.audiofx.Visualizer;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -89,6 +90,32 @@ class VisualizerView extends View {
        	mPoints = null;
        	invalidate();
     }
+    
+    @Override
+	  protected void onRestoreInstanceState(Parcelable state) {
+		  if (!(state instanceof SavedState)) {
+			  super.onRestoreInstanceState(state);
+		  } else {
+			  SavedState ss = (SavedState)state;
+			  super.onRestoreInstanceState(ss.getSuperState());
+			  this.mBytes = ss.mBytes;
+			  this.mPoints = ss.mPoints;
+			  this.mBytesArray = ss.mBytesArray;
+			  invalidate();
+		  }
+	  }
+
+	  @Override
+	  protected Parcelable onSaveInstanceState() {
+		Parcelable superState = super.onSaveInstanceState();
+	    SavedState ss = new SavedState(superState);
+	    //end
+	    ss.mBytes = this.mBytes;
+	    ss.mPoints = this.mPoints;
+	    ss.mBytesArray = this.mBytesArray;
+
+	    return ss;
+	  }
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -118,4 +145,42 @@ class VisualizerView extends View {
         }
         canvas.drawLines(mPoints, mForePaint);
     }
+    
+    private static class SavedState extends BaseSavedState {
+		  
+	    byte[] mBytes;
+	    float[] mPoints;
+	    ArrayList<Byte> mBytesArray;
+	    
+	    SavedState(Parcelable superState) {
+	    	super(superState);
+	    }
+
+	    @SuppressWarnings("unchecked")
+		private SavedState(Parcel in) {
+	    	super(in);
+	    	this.mBytes = in.createByteArray();
+	    	this.mPoints = in.createFloatArray();
+	    	this.mBytesArray = (ArrayList<Byte>) in.readSerializable();
+	    }
+
+	    @Override
+	    public void writeToParcel(Parcel out, int flags) {
+	    	super.writeToParcel(out, flags);
+	    	out.writeByteArray(mBytes);
+	    	out.writeFloatArray(mPoints);
+	    	out.writeSerializable(mBytesArray);
+	   }
+
+	    //required field that makes Parcelables from a Parcel
+	    public static final Parcelable.Creator<SavedState> CREATOR =
+	        new Parcelable.Creator<SavedState>() {
+	          public SavedState createFromParcel(Parcel in) {
+	            return new SavedState(in);
+	          }
+	          public SavedState[] newArray(int size) {
+	            return new SavedState[size];
+	          }
+	    };
+  }
 }

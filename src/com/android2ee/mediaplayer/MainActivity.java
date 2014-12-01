@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -85,6 +86,8 @@ public class MainActivity extends ABoundActivity {
 		});
 		
 		File dir = getExternalFilesDir(Environment.DIRECTORY_MUSIC);
+		// Sometimes this fucking External return null don't know why ?
+		//File dir = Environment.getExternalStorageDirectory();
 		if (dir != null) {
 			File subdir = new File(dir.getAbsolutePath() + SUB_PATH);
 			if (!subdir.exists()) {
@@ -93,6 +96,8 @@ public class MainActivity extends ABoundActivity {
 			pathFile = subdir;
 		} else {
 			// TODO default ? finish ?
+			Log.e(getClass().getSimpleName(), "Error when get the filePath, getExternalFilesDir return null");
+			finish();
 		}
 		Intent intent = new Intent(this, MediaService.class);
         startService(intent);

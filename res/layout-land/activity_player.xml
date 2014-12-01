@@ -69,14 +69,19 @@
 	        			android:layout_alignParentTop="true"
 	        			android:layout_marginTop="10dp"
 	        			android:layout_above="@id/player_seekbar"
-	        			android:orientation="vertical">
+	        			android:orientation="horizontal">
 	    
+	    <!-- <LinearLayout android:id="@+id/player_chartfft"
+	        			android:layout_width="match_parent"
+	        			android:layout_height="match_parent"
+	        			android:orientation="vertical"
+	        			android:layout_weight="1"/> -->
 	     <com.android2ee.mediaplayer.VisualizerFFTView
 	        		    android:id="@+id/player_viewfft"
 	       				android:layout_width="match_parent"
 	        			android:layout_height="match_parent"
 	        			android:layout_marginLeft="10dp"
-        				android:layout_marginRight="10dp"
+        				android:layout_marginRight="5dp"
 	        			android:layout_weight="1">
 	        
 	    </com.android2ee.mediaplayer.VisualizerFFTView>   			
@@ -84,7 +89,8 @@
 	        		    android:id="@+id/player_view"
 	       				android:layout_width="match_parent"
 	        			android:layout_height="match_parent"
-	        			android:layout_marginTop="10dp"
+	        			android:layout_marginLeft="10dp"
+        				android:layout_marginRight="5dp"
 	        			android:layout_weight="1">
 	        
 	    </com.android2ee.mediaplayer.VisualizerView>
