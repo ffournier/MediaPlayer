@@ -1,4 +1,4 @@
-package com.android2ee.mediaplayer;
+package com.android2ee.mediaplayer.pojo;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;

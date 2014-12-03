@@ -1,4 +1,4 @@
-package com.android2ee.mediaplayer;
+package com.android2ee.mediaplayer.activity;
 
 
 import java.io.File;
@@ -21,6 +21,10 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+
+import com.android2ee.mediaplayer.R;
+import com.android2ee.mediaplayer.pojo.POJOAudio;
+import com.android2ee.mediaplayer.service.MediaService;
 
 public class MainActivity extends ABoundActivity {
 	
@@ -105,12 +109,6 @@ public class MainActivity extends ABoundActivity {
 	
 	
 	@Override
-	protected void onStart() {
-		super.onStart();
-		
-	}
-	
-	@Override
 	protected void onResume() {
 		super.onResume();
 		if (audios.size() <= 0) {
@@ -122,22 +120,18 @@ public class MainActivity extends ABoundActivity {
 		}
 	}
 	
+	
+	
 	@Override
 	protected void onPause() {
 		super.onPause();
-	}
-
-
-	@Override
-	protected void onStop() {
-		super.onStop();
-	
 		// finish service when quit the application
         if (isFinishing()) {
         	Intent intent = new Intent(this, MediaService.class);
         	stopService(intent);
         }
 	}
+
 
 	/**
 	 * 
@@ -240,6 +234,8 @@ public class MainActivity extends ABoundActivity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		
+		Log.w("TAG", "onDestroy");
 		
 	}
 

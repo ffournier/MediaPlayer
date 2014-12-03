@@ -1,4 +1,4 @@
-package com.android2ee.mediaplayer;
+package com.android2ee.mediaplayer.view;
 
 import java.util.ArrayList;
 
@@ -19,7 +19,7 @@ import android.view.View;
  * A simple class that draws waveform data received from a
  * {@link Visualizer.OnDataCaptureListener#onWaveFormDataCapture }
  */
-class VisualizerView extends View {
+public class VisualizerView extends View {
 	
     private ArrayList<Byte> mBytesArray;
     private byte[] mBytes;

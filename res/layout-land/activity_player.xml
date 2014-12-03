@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.android2ee.mediaplayer.PlayerActivity" 
+    tools:context="com.android2ee.mediaplayer.activity.PlayerActivity" 
     android:orientation="vertical">
 
     
@@ -76,7 +76,7 @@
 	        			android:layout_height="match_parent"
 	        			android:orientation="vertical"
 	        			android:layout_weight="1"/> -->
-	     <com.android2ee.mediaplayer.VisualizerFFTView
+	     <com.android2ee.mediaplayer.view.VisualizerFFTView
 	        		    android:id="@+id/player_viewfft"
 	       				android:layout_width="match_parent"
 	        			android:layout_height="match_parent"
@@ -84,8 +84,8 @@
         				android:layout_marginRight="5dp"
 	        			android:layout_weight="1">
 	        
-	    </com.android2ee.mediaplayer.VisualizerFFTView>   			
-	    <com.android2ee.mediaplayer.VisualizerView
+	    </com.android2ee.mediaplayer.view.VisualizerFFTView>   			
+	    <com.android2ee.mediaplayer.view.VisualizerView
 	        		    android:id="@+id/player_view"
 	       				android:layout_width="match_parent"
 	        			android:layout_height="match_parent"
@@ -93,6 +93,6 @@
         				android:layout_marginRight="5dp"
 	        			android:layout_weight="1">
 	        
-	    </com.android2ee.mediaplayer.VisualizerView>
+	    </com.android2ee.mediaplayer.view.VisualizerView>
     </LinearLayout>
 </RelativeLayout>

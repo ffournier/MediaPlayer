@@ -1,8 +1,9 @@
-package com.android2ee.mediaplayer;
+package com.android2ee.mediaplayer.service;
 
 import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
+
 
 import android.app.Service;
 import android.content.Intent;

@@ -1,4 +1,4 @@
-package com.android2ee.mediaplayer;
+package com.android2ee.mediaplayer.activity;
 
 
 import android.content.ComponentName;
@@ -7,7 +7,8 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.support.v7.app.ActionBarActivity;
 
-import com.android2ee.mediaplayer.MediaService.LocalBinder;
+import com.android2ee.mediaplayer.service.MediaService;
+import com.android2ee.mediaplayer.service.MediaService.LocalBinder;
 
 public abstract class ABoundActivity extends ActionBarActivity {
 	

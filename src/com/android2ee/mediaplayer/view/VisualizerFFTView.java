@@ -1,4 +1,4 @@
-package com.android2ee.mediaplayer;
+package com.android2ee.mediaplayer.view;
 
 import android.content.Context;
 import android.graphics.Canvas;

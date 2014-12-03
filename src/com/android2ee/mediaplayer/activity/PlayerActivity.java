@@ -1,4 +1,4 @@
-package com.android2ee.mediaplayer;
+package com.android2ee.mediaplayer.activity;
 
 
 import java.text.SimpleDateFormat;
@@ -16,6 +16,12 @@ import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
+
+import com.android2ee.mediaplayer.R;
+import com.android2ee.mediaplayer.pojo.POJOAudio;
+import com.android2ee.mediaplayer.service.MediaService;
+import com.android2ee.mediaplayer.view.VisualizerFFTView;
+import com.android2ee.mediaplayer.view.VisualizerView;
 
 public class PlayerActivity extends ABoundActivity {
 	

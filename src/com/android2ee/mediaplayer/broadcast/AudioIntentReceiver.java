@@ -1,4 +1,6 @@
-package com.android2ee.mediaplayer;
+package com.android2ee.mediaplayer.broadcast;
+
+import com.android2ee.mediaplayer.service.MediaService;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
