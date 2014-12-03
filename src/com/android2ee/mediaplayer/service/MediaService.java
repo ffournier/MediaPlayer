@@ -1,9 +1,9 @@
 package com.android2ee.mediaplayer.service;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Timer;
 import java.util.TimerTask;
-
 
 import android.app.Service;
 import android.content.Intent;
@@ -29,17 +29,16 @@ import android.util.Log;
  */
 public class MediaService extends Service implements OnAudioFocusChangeListener {
 	
-	
 	public static final int PLAY_PROGRESS = 0;
 	public static final int PLAY_END = 1;
 	public static final int PLAY_START = 2;
 	public static final int PLAY_FFT = 3;
 	public static final int PLAY_WAVEFROM = 4;
-	
+	public static final int RECORD_WAVEFROM = 5;
 	
 	public static final int ACTION_STOP = 1;
 	
-	
+	public static final String KEY_RECORD_WAVEFROM = "com.android2ee.mediaplayer.record.wavefrom_media";
 	public static final String KEY_PLAY_DURATION = "com.android2ee.mediaplayer.duration_media";
 	public static final String KEY_PLAY_CURRENT = "com.android2ee.mediaplayer.current_media";
 	public static final String KEY_PLAY_FFT = "com.android2ee.mediaplayer.fft_media";
@@ -166,6 +165,7 @@ public class MediaService extends Service implements OnAudioFocusChangeListener 
 				mRecorder.prepare();
 				mRecorder.start();
 				isRecord = StatePlayer.STATE_PLAY;
+				scheduleTimerRecord();
 			} catch (IllegalStateException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -188,6 +188,8 @@ public class MediaService extends Service implements OnAudioFocusChangeListener 
 				mRecorder.stop();
 				mRecorder.reset();
 				isRecord = StatePlayer.STATE_DEFAULT;
+				Log.w("TAG", "stopRecorder");
+				purgeTimer();
 			}
 		}
 		return isRecord == StatePlayer.STATE_DEFAULT;
@@ -438,6 +440,20 @@ public class MediaService extends Service implements OnAudioFocusChangeListener 
 	/**
 	 * 
 	 */
+	private void sendRecordWaveFrom(int amp) {
+		if (handler != null && isRecorderPlay()) {
+			Message msg = handler.obtainMessage();
+			msg.what = RECORD_WAVEFROM;
+			Bundle bundle = new Bundle();
+			bundle.putInt(KEY_RECORD_WAVEFROM, amp);
+			msg.setData(bundle);
+			handler.sendMessage(msg);
+		}
+	}
+	
+	/**
+	 * 
+	 */
 	private void sendPlayEnding() {
 		if (handler != null && isPlayerCreate()) {
 			Message msg = handler.obtainMessage();
@@ -465,6 +481,27 @@ public class MediaService extends Service implements OnAudioFocusChangeListener 
 			
 			mTimer.scheduleAtFixedRate(timerTask, 0, 500);
 			
+		}
+	}
+	
+	/**
+	 * 
+	 */
+	private void scheduleTimerRecord() {
+		if (mTimer != null) {
+			TimerTask timerTask = new TimerTask() {
+				
+				@Override
+				public void run() {
+					if (isRecorderPlay()) {
+						int value = mRecorder.getMaxAmplitude();
+						if (value > 0) {
+							sendRecordWaveFrom(value);
+						}
+				   }
+				}
+			};
+			mTimer.scheduleAtFixedRate(timerTask, 0, 50);
 		}
 	}
 	

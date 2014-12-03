@@ -13,6 +13,8 @@ import java.util.regex.Pattern;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -25,6 +27,7 @@ import android.widget.ListView;
 import com.android2ee.mediaplayer.R;
 import com.android2ee.mediaplayer.pojo.POJOAudio;
 import com.android2ee.mediaplayer.service.MediaService;
+import com.android2ee.mediaplayer.view.VisualizerAmpView;
 
 public class MainActivity extends ABoundActivity {
 	
@@ -40,9 +43,29 @@ public class MainActivity extends ABoundActivity {
 	
 	private File pathFile = null;
 	private static final String fileNamePattern = "android2ee_%s_%04d-%02d-%02d-%02d-%02d-%02d.wav";
+	private VisualizerAmpView myView;
+	
+	private int index = 0;
+	private byte[] bytes = new byte[1024];
+	
+	private class MyHandler extends Handler {
+		
+		@Override
+	    public void handleMessage(Message message) {
+			switch (message.what) {
+			case MediaService.RECORD_WAVEFROM:
+				int amp = message.getData().getInt(MediaService.KEY_RECORD_WAVEFROM);
+	        	addDataAmp(amp);
+	            break;    
+	        }
+		}
+	}
+
+	private Handler myHandler = new MyHandler();
 	
 	@Override
 	protected void serviceConnected(MediaService service) {
+		mService.setHandler(myHandler);
 		updateResource(service.isRecorderCreate());
 	}
 	
@@ -89,9 +112,11 @@ public class MainActivity extends ABoundActivity {
 			}
 		});
 		
-		File dir = getExternalFilesDir(Environment.DIRECTORY_MUSIC);
+		myView = (VisualizerAmpView) findViewById(R.id.record_view_data);
+		
+		//File dir = getExternalFilesDir(Environment.DIRECTORY_MUSIC);
 		// Sometimes this fucking External return null don't know why ?
-		//File dir = Environment.getExternalStorageDirectory();
+		File dir = Environment.getExternalStorageDirectory();
 		if (dir != null) {
 			File subdir = new File(dir.getAbsolutePath() + SUB_PATH);
 			if (!subdir.exists()) {
@@ -154,6 +179,7 @@ public class MainActivity extends ABoundActivity {
 			Date date = calendar.getTime();
 			recorded = mService.startRecorder(fileFullPath);
 			if (recorded) {
+				myView.startVisualizer();
 				POJOAudio object = new POJOAudio(fileFullPath, name, date);
 				mService.setAudioRecord(object);
 			}
@@ -161,7 +187,7 @@ public class MainActivity extends ABoundActivity {
 			// Stop Media Player Recorder
 			POJOAudio object = (POJOAudio) mService.getAudioRecord();
 			mService.stopRecorder();
-			
+			myView.endVisualizer();
 			if (object != null) {
 				// add in list
 				object.updateTime();
@@ -230,12 +256,20 @@ public class MainActivity extends ABoundActivity {
 		}
 		return result;
 	}
+	
+	 /**
+	 * 
+	 */
+    private void addDataAmp(int value) {
+		if (mBound && mService.isRecorderPlay()) {
+    		myView.updateVisualizer(value);
+    	}
+		
+    }
 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		
-		Log.w("TAG", "onDestroy");
 		
 	}
 
