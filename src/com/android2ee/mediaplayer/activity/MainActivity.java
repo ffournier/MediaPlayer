@@ -45,9 +45,6 @@ public class MainActivity extends ABoundActivity {
 	private static final String fileNamePattern = "android2ee_%s_%04d-%02d-%02d-%02d-%02d-%02d.wav";
 	private VisualizerAmpView myView;
 	
-	private int index = 0;
-	private byte[] bytes = new byte[1024];
-	
 	private class MyHandler extends Handler {
 		
 		@Override
