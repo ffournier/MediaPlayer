@@ -1,6 +1,7 @@
 MediaPlayer
 ===========
 
+this is an tutorial how to use MediaPlayer and MediaRecorder
 
 # See Result :
 
